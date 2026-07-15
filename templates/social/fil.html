@@ -35,7 +35,9 @@
         <li><a href="{% url 'groupes:liste' %}" class="side-link"><span class="ic">👥</span> Groupes</a></li>
         <li><a href="{% url 'messagerie:liste' %}" class="side-link"><span class="ic">💬</span> Messages</a></li>
         <li><a href="{% url 'collection:ma_collection' %}" class="side-link"><span class="ic">🃏</span> Collection</a></li>
-        <li><a href="{% url 'admin:index' %}" class="side-link"><span class="ic">⚙️</span> Administration</a></li>
+        {% if user.is_staff %}
+          <li><a href="{% url 'admin:index' %}" class="side-link"><span class="ic">⚙️</span> Administration</a></li>
+        {% endif %}
       </ul>
     </div>
   </div>
