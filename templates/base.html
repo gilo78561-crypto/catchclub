@@ -5,6 +5,17 @@
 <meta charset="UTF-8">
 <title>{% block titre %}CatchClub{% endblock %}</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Progressive Web App : icône + ouverture en plein écran sur mobile -->
+<link rel="manifest" href="{% static 'manifest.json' %}">
+<meta name="theme-color" content="#10121A">
+<link rel="icon" href="{% static 'icons/favicon-32.png' %}" sizes="32x32">
+<link rel="apple-touch-icon" href="{% static 'icons/apple-touch-icon.png' %}">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CatchClub">
+
 <link rel="stylesheet" href="{% static 'css/style.css' %}">
 <script type="module" src="https://unpkg.com/@google/model-viewer@3.5.0/dist/model-viewer.min.js"></script>
 </head>
@@ -45,6 +56,16 @@
 {% endif %}
 
 {% block contenu %}{% endblock %}
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function () {
+    navigator.serviceWorker.register('/sw.js').catch(function (err) {
+      console.warn('Service worker non enregistré :', err);
+    });
+  });
+}
+</script>
 
 </body>
 </html>

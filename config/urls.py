@@ -1,10 +1,23 @@
 from django.conf import settings
 from django.contrib import admin
+from django.http import HttpResponse
 from django.urls import path, include
 from django.views.static import serve
 
+
+def service_worker(request):
+    """
+    Sert sw.js depuis la racine du site (et non /static/sw.js) : c'est
+    nécessaire pour que le service worker puisse contrôler l'ensemble du
+    site (sa "portée" par défaut se limite au dossier où il est servi).
+    """
+    with open(settings.BASE_DIR / 'static' / 'sw.js', 'rb') as f:
+        return HttpResponse(f.read(), content_type='application/javascript')
+
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('sw.js', service_worker, name='service_worker'),
     path('comptes/', include('comptes.urls')),
     path('', include('social.urls')),
     path('groupes/', include('groupes.urls')),

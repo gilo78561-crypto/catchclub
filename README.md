@@ -179,7 +179,52 @@ bancaire, via Render) : voir **`DEPLOIEMENT.md`**, qui détaille toutes les
   "Répondre" qui ouvre un petit formulaire ; les réponses s'affichent
   indentées sous le commentaire d'origine (un seul niveau de profondeur).
 
-## 11. Prochaines pistes (non incluses)
+## 12. Adaptation mobile
+
+Le site est maintenant réactif sur petit écran (téléphone) :
+- l'en-tête (logo, recherche, icônes) s'empile proprement au lieu de déborder,
+- la messagerie passe en une colonne (liste des conversations au-dessus,
+  fenêtre de chat en dessous),
+- l'écran d'échange de cartes passe ses deux colonnes en pile,
+- les grilles (collection, sélecteurs de type/modèle 3D) s'adaptent à la
+  largeur disponible.
+
+Le point de rupture principal est à 640px de large (téléphones), avec un
+second à 1020px déjà présent pour les tablettes (les 3 colonnes du fil
+d'actualité passent alors à 1 colonne).
+
+## 14. Installer CatchClub comme une application (PWA)
+
+Le site est maintenant une **Progressive Web App** : il peut s'installer
+sur téléphone (ou PC) avec sa propre icône, et s'ouvrir en plein écran
+sans barre d'adresse, comme une vraie application.
+
+**Sur Android (Chrome)** : ouvrir le site, menu ⋮ → **"Installer
+l'application"** (ou un bandeau propose de le faire automatiquement).
+
+**Sur iPhone (Safari)** : ouvrir le site, bouton **Partager** (carré avec
+flèche) → **"Sur l'écran d'accueil"**.
+
+**Sur PC (Chrome/Edge)** : une icône ⊕ apparaît dans la barre d'adresse
+pour installer le site comme application de bureau.
+
+Ce que ça ajoute techniquement :
+- `static/manifest.json` : nom, icônes, couleurs, mode plein écran
+  (`display: standalone`).
+- `static/icons/` : icônes générées aux formats nécessaires (192px, 512px,
+  icône Apple, favicon).
+- `static/sw.js` (service worker), servi depuis la racine du site
+  (`/sw.js`, voir `config/urls.py`) pour qu'il couvre bien tout le site.
+  Il met en cache la feuille de style et les icônes pour un chargement
+  plus rapide, et garde en mémoire les dernières pages visitées pour un
+  minimum de contenu accessible hors-ligne. Les modèles 3D (trop lourds)
+  ne sont volontairement pas mis en cache.
+
+Ça ne remplace pas une vraie application native (pas de notifications
+push, par exemple), mais ça donne l'expérience "icône + plein écran" que
+tu voulais, sans code supplémentaire côté utilisateur.
+
+## 15. Prochaines pistes (non incluses)
 
 - Notifications en temps réel (WebSocket / Django Channels).
 - Recherche réelle (actuellement la barre de recherche est visuelle).
