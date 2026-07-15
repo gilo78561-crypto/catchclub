@@ -48,6 +48,7 @@
             </form>
           {% endif %}
           <a href="{% url 'messagerie:demarrer' dresseur.username %}" class="btn btn-ghost btn-block" style="margin-top:8px;">💬 Envoyer un message</a>
+          <a href="{% url 'collection:proposer_echange' dresseur.username %}" class="btn btn-ghost btn-block" style="margin-top:8px;">🔁 Échanger une carte</a>
         {% endif %}
       </div>
     </div>

@@ -677,6 +677,7 @@ textarea { resize: vertical; min-height: 70px; }
 .offer-row.selected { border-color: var(--accent); background: var(--accent-soft); }
 
 .text-muted { color: var(--text-muted); }
+.cache { display: none !important; }
 
 /* ============================================================
    MODÈLES 3D — sélecteur (tuiles) + cadre d'affichage

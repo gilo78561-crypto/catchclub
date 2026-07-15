@@ -13,7 +13,11 @@
 {% if user.is_authenticated %}
 <header class="top-nav">
   <a href="{% url 'social:fil' %}" class="brand"><span class="brand-mark"></span> CatchClub</a>
-  <div class="top-search">🔍 Rechercher un dresseur, un pokémone, un groupe…</div>
+  <form method="get" action="{% url 'social:rechercher' %}" class="top-search" style="padding:0;">
+    <span style="padding-left:16px;">🔍</span>
+    <input type="text" name="q" placeholder="Rechercher un dresseur, un pokémone, un groupe…" value="{{ request.GET.q }}"
+           style="border:none;background:transparent;flex:1;padding:8px 16px 8px 8px;color:var(--text);">
+  </form>
   <div class="top-nav-icons">
     <a href="{% url 'messagerie:liste' %}" class="icon-btn">💬</a>
     <a href="{% url 'groupes:liste' %}" class="icon-btn">👥</a>

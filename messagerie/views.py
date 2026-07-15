@@ -1,3 +1,4 @@
+from django.contrib import messages as flash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 from django.shortcuts import render, redirect, get_object_or_404
@@ -8,19 +9,30 @@ from .models import Conversation, Message
 Dresseur = get_user_model()
 
 
+def _conversations_avec_autre(request):
+    """Renvoie la liste des conversations de l'utilisateur, chacune avec
+    le bon interlocuteur (jamais soi-même, même dans une conversation à
+    plusieurs)."""
+    resultat = []
+    for conv in request.user.conversations.all():
+        resultat.append({'conversation': conv, 'autre': conv.autre_participant(request.user)})
+    return resultat
+
+
 @login_required
 def liste_conversations(request):
-    conversations = request.user.conversations.all()
-    return render(request, 'messagerie/liste.html', {'conversations': conversations})
+    return render(request, 'messagerie/liste.html', {
+        'conversations_avec_autre': _conversations_avec_autre(request),
+    })
 
 
 @login_required
 def conversation_detail(request, pk):
     conversation = get_object_or_404(Conversation, pk=pk, participants=request.user)
-    autre = conversation.participants.exclude(id=request.user.id).first()
-    conversations = request.user.conversations.all()
+    autre = conversation.autre_participant(request.user)
     return render(request, 'messagerie/detail.html', {
-        'conversation': conversation, 'autre': autre, 'conversations': conversations,
+        'conversation': conversation, 'autre': autre,
+        'conversations_avec_autre': _conversations_avec_autre(request),
     })
 
 
@@ -29,8 +41,9 @@ def conversation_detail(request, pk):
 def envoyer_message(request, pk):
     conversation = get_object_or_404(Conversation, pk=pk, participants=request.user)
     contenu = request.POST.get('contenu', '').strip()
-    if contenu:
-        Message.objects.create(conversation=conversation, auteur=request.user, contenu=contenu)
+    fichier = request.FILES.get('fichier')
+    if contenu or fichier:
+        Message.objects.create(conversation=conversation, auteur=request.user, contenu=contenu, fichier=fichier)
     return redirect('messagerie:detail', pk=pk)
 
 

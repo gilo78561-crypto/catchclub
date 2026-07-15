@@ -10,4 +10,5 @@ urlpatterns = [
     path('post/<int:post_id>/commenter/', views.commenter, name='commenter'),
     path('suivre/<str:username>/', views.suivre, name='suivre'),
     path('se-desabonner/<str:username>/', views.se_desabonner, name='se_desabonner'),
+    path('recherche/', views.rechercher, name='rechercher'),
 ]

@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block titre %}CatchClub — Recherche{% endblock %}
+{% block contenu %}
+<div class="layout center-only">
+  <h1 style="font-size:22px;">Résultats pour « {{ q }} »</h1>
+
+  <div class="card" style="margin-top:14px;">
+    <div class="card-title">Dresseurs</div>
+    {% for d in dresseurs %}
+      <a href="{% url 'comptes:profil' d.username %}" class="group-row" style="display:flex;">
+        <div class="avatar-ball size-m" style="--type-color:var(--type-{{ d.pokemone.type|default:'normal' }});">
+          {% if d.pokemone.image %}<img src="{{ d.pokemone.image.url }}" alt="">{% endif %}
+        </div>
+        <div>
+          <div class="group-name">{{ d.username }}</div>
+          {% if d.pokemone %}<div class="group-meta">{{ d.pokemone.nom }} · {{ d.pokemone.get_type_display }}</div>{% endif %}
+        </div>
+      </a>
+    {% empty %}
+      <p class="text-muted" style="font-size:13.5px;">{% if q %}Aucun dresseur trouvé.{% else %}Tape un nom dans la barre de recherche.{% endif %}</p>
+    {% endfor %}
+  </div>
+
+  <div class="card" style="margin-top:16px;">
+    <div class="card-title">Groupes</div>
+    {% for g in groupes %}
+      <a href="{% url 'groupes:detail' g.pk %}" class="group-row" style="display:flex;">
+        <div class="group-thumb" style="background:var(--type-{{ g.type }});">{{ g.nom|slice:":1" }}</div>
+        <div><div class="group-name">{{ g.nom }}</div><div class="group-meta">{{ g.nb_membres }} membres</div></div>
+      </a>
+    {% empty %}
+      <p class="text-muted" style="font-size:13.5px;">{% if q %}Aucun groupe trouvé.{% endif %}</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

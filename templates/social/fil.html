@@ -73,8 +73,21 @@
           </form>
           <div class="post-action" style="flex:1;">💬 {{ post.nb_commentaires }} commentaire{{ post.nb_commentaires|pluralize }}</div>
         </div>
-        {% for commentaire in post.commentaires.all %}
-          <p class="text-muted" style="font-size:13px;margin:6px 0 0;"><b>{{ commentaire.auteur.username }}</b> {{ commentaire.contenu }}</p>
+        {% for commentaire in post.commentaires_principaux %}
+          <div class="commentaire-bloc" style="margin-top:8px;">
+            <p class="text-muted" style="font-size:13px;margin:0;"><b>{{ commentaire.auteur.username }}</b> {{ commentaire.contenu }}
+              <button type="button" class="lien-repondre" onclick="document.getElementById('reponse-{{ commentaire.id }}').classList.toggle('cache')" style="background:none;border:none;color:var(--accent-strong);font-size:12px;cursor:pointer;padding:0;margin-left:6px;">Répondre</button>
+            </p>
+            {% for reponse in commentaire.reponses.all %}
+              <p class="text-muted" style="font-size:12.5px;margin:4px 0 0 20px;border-left:2px solid var(--border);padding-left:8px;"><b>{{ reponse.auteur.username }}</b> {{ reponse.contenu }}</p>
+            {% endfor %}
+            <form method="post" action="{% url 'social:commenter' post.id %}" id="reponse-{{ commentaire.id }}" class="cache" style="display:flex;gap:6px;margin:6px 0 0 20px;">
+              {% csrf_token %}
+              <input type="hidden" name="parent_id" value="{{ commentaire.id }}">
+              <input type="text" name="contenu" placeholder="Répondre à {{ commentaire.auteur.username }}…" required style="font-size:12.5px;">
+              <button type="submit" class="btn btn-ghost" style="padding:6px 10px;font-size:12px;">Envoyer</button>
+            </form>
+          </div>
         {% endfor %}
         <form method="post" action="{% url 'social:commenter' post.id %}" style="display:flex;gap:8px;margin-top:8px;">
           {% csrf_token %}

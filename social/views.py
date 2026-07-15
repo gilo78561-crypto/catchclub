@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
+from django.db import models
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
 
@@ -56,6 +57,9 @@ def commenter(request, post_id):
         commentaire = form.save(commit=False)
         commentaire.post = post
         commentaire.auteur = request.user
+        parent_id = request.POST.get('parent_id')
+        if parent_id:
+            commentaire.parent = get_object_or_404(Commentaire, id=parent_id, post=post)
         commentaire.save()
     return redirect(request.META.get('HTTP_REFERER', 'social:fil'))
 
@@ -78,3 +82,20 @@ def se_desabonner(request, username):
     Abonnement.objects.filter(suiveur=request.user, suivi=cible).delete()
     messages.info(request, f"Tu ne suis plus {cible.username}.")
     return redirect('comptes:profil', username=username)
+
+
+@login_required
+def rechercher(request):
+    """Recherche de dresseurs par nom d'utilisateur ou nom de pokémone."""
+    from groupes.models import Groupe
+
+    q = request.GET.get('q', '').strip()
+    dresseurs = []
+    groupes = []
+    if q:
+        dresseurs = Dresseur.objects.filter(
+            models.Q(username__icontains=q) | models.Q(pokemone__nom__icontains=q)
+        ).select_related('pokemone').distinct()
+        groupes = Groupe.objects.filter(nom__icontains=q)
+
+    return render(request, 'social/recherche.html', {'q': q, 'dresseurs': dresseurs, 'groupes': groupes})

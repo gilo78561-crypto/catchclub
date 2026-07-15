@@ -164,7 +164,22 @@ Pour obtenir un lien à envoyer à des amis (hébergement gratuit, sans carte
 bancaire, via Render) : voir **`DEPLOIEMENT.md`**, qui détaille toutes les
 étapes pas à pas.
 
-## 10. Prochaines pistes (non incluses)
+## 10. Nouveautés (recherche, pièces jointes, réponses, échanges visibles)
+
+- **Recherche fonctionnelle** : la barre du header cherche maintenant
+  vraiment les dresseurs (par pseudo ou nom de pokémone) et les groupes.
+- **Messagerie** : possibilité d'envoyer une image ou une vidéo (bouton 📎),
+  affichées directement dans les bulles de conversation. Le pokémon de
+  l'interlocuteur (nom, type, modèle 3D si disponible) est visible en haut
+  du chat, et un bouton **"🔁 Échanger une carte"** y donne un accès direct.
+- **Échange de cartes** : bouton dédié maintenant visible aussi bien sur
+  le profil d'un ami que dans sa conversation (avant, il fallait deviner
+  l'URL).
+- **Réponses aux commentaires** : chaque commentaire a un bouton
+  "Répondre" qui ouvre un petit formulaire ; les réponses s'affichent
+  indentées sous le commentaire d'origine (un seul niveau de profondeur).
+
+## 11. Prochaines pistes (non incluses)
 
 - Notifications en temps réel (WebSocket / Django Channels).
 - Recherche réelle (actuellement la barre de recherche est visuelle).

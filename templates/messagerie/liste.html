@@ -4,18 +4,20 @@
 <div class="layout center-only">
   <h1 style="font-size:22px;margin-bottom:14px;">Messages</h1>
   <div class="card">
-    {% for conv in conversations %}
-      {% with autre=conv.participants.all|first %}
-      <a href="{% url 'messagerie:detail' conv.pk %}" class="group-row" style="display:flex;">
-        <div class="avatar-ball size-m" style="--type-color:var(--type-normal);"></div>
+    {% for item in conversations_avec_autre %}
+      <a href="{% url 'messagerie:detail' item.conversation.pk %}" class="group-row" style="display:flex;">
+        <div class="avatar-ball size-m" style="--type-color:var(--type-{{ item.autre.pokemone.type|default:'normal' }});">
+          {% if item.autre.pokemone.image %}<img src="{{ item.autre.pokemone.image.url }}" alt="">{% endif %}
+        </div>
         <div style="flex:1;">
-          <div class="group-name">
-            {% for p in conv.participants.all %}{% if p != user %}{{ p.username }}{% endif %}{% endfor %}
+          <div class="group-name">{{ item.autre.username }}</div>
+          <div class="group-meta">
+            {% with dernier=item.conversation.dernier_message %}
+              {% if dernier.fichier %}📎 Pièce jointe{% else %}{{ dernier.contenu|default:"Aucun message pour l'instant"|truncatechars:50 }}{% endif %}
+            {% endwith %}
           </div>
-          <div class="group-meta">{{ conv.dernier_message.contenu|default:"Aucun message pour l'instant"|truncatechars:50 }}</div>
         </div>
       </a>
-      {% endwith %}
     {% empty %}
       <p class="text-muted" style="font-size:13.5px;">Aucune conversation. Rends-toi sur un profil pour envoyer un message.</p>
     {% endfor %}

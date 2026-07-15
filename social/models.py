@@ -27,10 +27,15 @@ class Post(models.Model):
     def nb_commentaires(self):
         return self.commentaires.count()
 
+    @property
+    def commentaires_principaux(self):
+        return self.commentaires.filter(parent__isnull=True)
+
 
 class Commentaire(models.Model):
     post = models.ForeignKey(Post, on_delete=models.CASCADE, related_name='commentaires')
     auteur = models.ForeignKey(Dresseur, on_delete=models.CASCADE, related_name='commentaires')
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, related_name='reponses', null=True, blank=True)
     contenu = models.CharField('contenu', max_length=300)
     date_publication = models.DateTimeField(auto_now_add=True)
 

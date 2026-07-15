@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 {% block titre %}CatchClub — Conversation avec {{ autre.username }}{% endblock %}
 {% block contenu %}
 <div class="layout center-only">
@@ -6,32 +7,59 @@
 
   <div class="chat-shell">
     <div class="chat-list">
-      {% for conv in conversations %}
-        <a href="{% url 'messagerie:detail' conv.pk %}" class="chat-item {% if conv.pk == conversation.pk %}active{% endif %}" style="display:flex;">
-          <div class="avatar-ball size-m" style="--type-color:var(--type-normal);"></div>
+      {% for item in conversations_avec_autre %}
+        <a href="{% url 'messagerie:detail' item.conversation.pk %}" class="chat-item {% if item.conversation.pk == conversation.pk %}active{% endif %}" style="display:flex;">
+          <div class="avatar-ball size-m" style="--type-color:var(--type-{{ item.autre.pokemone.type|default:'normal' }});">
+            {% if item.autre.pokemone.image %}<img src="{{ item.autre.pokemone.image.url }}" alt="">{% endif %}
+          </div>
           <div>
-            <div class="group-name">{% for p in conv.participants.all %}{% if p != user %}{{ p.username }}{% endif %}{% endfor %}</div>
-            <div class="group-meta">{{ conv.dernier_message.contenu|default:""|truncatechars:30 }}</div>
+            <div class="group-name">{{ item.autre.username }}</div>
+            <div class="group-meta">{% with d=item.conversation.dernier_message %}{% if d.fichier %}📎 Pièce jointe{% else %}{{ d.contenu|default:""|truncatechars:30 }}{% endif %}{% endwith %}</div>
           </div>
         </a>
       {% endfor %}
     </div>
 
     <div class="chat-window">
-      <div class="chat-header">
-        <div class="avatar-ball size-s" style="--type-color:var(--type-{{ autre.pokemone.type|default:'normal' }});"></div>
-        <div class="group-name">{{ autre.username }}</div>
+      <div class="chat-header" style="justify-content:space-between;">
+        <a href="{% url 'comptes:profil' autre.username %}" style="display:flex;align-items:center;gap:10px;">
+          {% if autre.pokemone.fichier_3d %}
+            <div class="viewer-3d-frame" style="width:40px;height:40px;--type-color:var(--type-{{ autre.pokemone.type }});">
+              <model-viewer class="viewer-3d" src="{% static autre.pokemone.fichier_3d %}" disable-zoom camera-controls="false" auto-rotate></model-viewer>
+            </div>
+          {% else %}
+            <div class="avatar-ball size-s" style="--type-color:var(--type-{{ autre.pokemone.type|default:'normal' }});">
+              {% if autre.pokemone.image %}<img src="{{ autre.pokemone.image.url }}" alt="">{% endif %}
+            </div>
+          {% endif %}
+          <div>
+            <div class="group-name">{{ autre.username }}</div>
+            {% if autre.pokemone %}<span class="type-badge {{ autre.pokemone.type }}" style="font-size:9px;padding:2px 7px;">{{ autre.pokemone.nom }}</span>{% endif %}
+          </div>
+        </a>
+        <a href="{% url 'collection:proposer_echange' autre.username %}" class="btn btn-ghost" style="padding:6px 12px;font-size:12px;">🔁 Échanger une carte</a>
       </div>
       <div class="chat-body">
         {% for message in conversation.messages.all %}
-          <div class="bubble {% if message.auteur == user %}out{% else %}in{% endif %}">{{ message.contenu }}</div>
+          <div class="bubble {% if message.auteur == user %}out{% else %}in{% endif %}">
+            {% if message.est_image %}
+              <img src="{{ message.fichier.url }}" alt="image envoyée" style="max-width:220px;border-radius:10px;display:block;">
+            {% elif message.est_video %}
+              <video src="{{ message.fichier.url }}" controls style="max-width:220px;border-radius:10px;display:block;"></video>
+            {% endif %}
+            {% if message.contenu %}<span>{{ message.contenu }}</span>{% endif %}
+          </div>
         {% empty %}
           <p class="text-muted" style="font-size:13px;">Dis bonjour à {{ autre.username }} 👋</p>
         {% endfor %}
       </div>
-      <form method="post" action="{% url 'messagerie:envoyer' conversation.pk %}" class="chat-input-row">
+      <form method="post" action="{% url 'messagerie:envoyer' conversation.pk %}" class="chat-input-row" enctype="multipart/form-data">
         {% csrf_token %}
-        <input type="text" name="contenu" placeholder="Écrire un message…" required autocomplete="off">
+        <label class="icon-btn" title="Joindre une image ou une vidéo" style="cursor:pointer;">
+          📎
+          <input type="file" name="fichier" accept="image/*,video/*" style="display:none;" onchange="this.form.querySelector('button[type=submit]').click();">
+        </label>
+        <input type="text" name="contenu" placeholder="Écrire un message…" autocomplete="off">
         <button type="submit" class="btn btn-primary">Envoyer</button>
       </form>
     </div>
