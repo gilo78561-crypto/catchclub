@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block titre %}CatchClub — Conversation avec {{ autre.username }}{% endblock %}
+{% block contenu %}
+<div class="layout center-only">
+  <h1 style="font-size:22px;margin-bottom:14px;">Messages</h1>
+
+  <div class="chat-shell">
+    <div class="chat-list">
+      {% for conv in conversations %}
+        <a href="{% url 'messagerie:detail' conv.pk %}" class="chat-item {% if conv.pk == conversation.pk %}active{% endif %}" style="display:flex;">
+          <div class="avatar-ball size-m" style="--type-color:var(--type-normal);"></div>
+          <div>
+            <div class="group-name">{% for p in conv.participants.all %}{% if p != user %}{{ p.username }}{% endif %}{% endfor %}</div>
+            <div class="group-meta">{{ conv.dernier_message.contenu|default:""|truncatechars:30 }}</div>
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+
+    <div class="chat-window">
+      <div class="chat-header">
+        <div class="avatar-ball size-s" style="--type-color:var(--type-{{ autre.pokemone.type|default:'normal' }});"></div>
+        <div class="group-name">{{ autre.username }}</div>
+      </div>
+      <div class="chat-body">
+        {% for message in conversation.messages.all %}
+          <div class="bubble {% if message.auteur == user %}out{% else %}in{% endif %}">{{ message.contenu }}</div>
+        {% empty %}
+          <p class="text-muted" style="font-size:13px;">Dis bonjour à {{ autre.username }} 👋</p>
+        {% endfor %}
+      </div>
+      <form method="post" action="{% url 'messagerie:envoyer' conversation.pk %}" class="chat-input-row">
+        {% csrf_token %}
+        <input type="text" name="contenu" placeholder="Écrire un message…" required autocomplete="off">
+        <button type="submit" class="btn btn-primary">Envoyer</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

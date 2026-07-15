@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% load static %}
+{% block titre %}CatchClub — Mon pokémon{% endblock %}
+{% block contenu %}
+<div class="layout center-only">
+  <div style="text-align:center;">
+    <h1 style="font-size:22px;">{{ pokemone.nom }}</h1>
+    <span class="type-badge {{ pokemone.type }}">{{ pokemone.get_type_display }}</span>
+    <p class="text-muted" style="font-size:13px;margin-top:6px;">Niveau <b id="niveau-valeur">{{ pokemone.niveau }}</b> · <span id="affection-valeur">{{ pokemone.affection }}</span> points d'affection</p>
+  </div>
+
+  <div style="position:relative;">
+    {% if pokemone.fichier_3d %}
+      <div class="grand-viewer-frame" id="viewer-frame" style="--type-color:var(--type-{{ pokemone.type }});">
+        <model-viewer id="viewer-3d" src="{% static pokemone.fichier_3d %}" camera-controls auto-rotate shadow-intensity="1" style="--poster-color:transparent;"></model-viewer>
+      </div>
+    {% else %}
+      <div class="grand-viewer-frame grand-flat" id="viewer-frame" style="--type-color:var(--type-{{ pokemone.type }});">
+        {% if pokemone.image %}
+          <img src="{{ pokemone.image.url }}" alt="{{ pokemone.nom }}" style="width:70%;height:70%;object-fit:contain;">
+        {% else %}
+          <span>{{ pokemone.nom }}</span>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="affection-bar-shell">
+    <div class="affection-bar-track"><div class="affection-bar-fill" id="affection-fill" style="width:{{ pokemone.progression_niveau }}%;"></div></div>
+    <p class="helper-text" style="text-align:center;margin-top:6px;" id="progression-texte">{{ pokemone.progression_niveau }}% jusqu'au niveau {{ pokemone.niveau|add:"1" }}</p>
+  </div>
+
+  <div class="action-row">
+    <button class="action-btn" data-action="nourrir"><span class="glyph">🍎</span> Nourrir</button>
+    <button class="action-btn" data-action="jouer"><span class="glyph">🎾</span> Jouer</button>
+    <button class="action-btn" data-action="caliner"><span class="glyph">💛</span> Câliner</button>
+  </div>
+
+  <p class="text-muted" style="text-align:center;font-size:12.5px;margin-top:16px;" id="message-interaction">
+    {% if pokemone.fichier_3d %}Fais glisser pour tourner autour de {{ pokemone.nom }}, ou clique sur une action ci-dessus.{% else %}Choisis un modèle 3D depuis "Modifier mon profil" pour une vue à 360°.{% endif %}
+  </p>
+</div>
+
+<script>
+(function() {
+  const csrftoken = document.cookie.split('; ').find(c => c.startsWith('csrftoken='))?.split('=')[1];
+  const frame = document.getElementById('viewer-frame');
+  const affectionEl = document.getElementById('affection-valeur');
+  const niveauEl = document.getElementById('niveau-valeur');
+  const fillEl = document.getElementById('affection-fill');
+  const progressionEl = document.getElementById('progression-texte');
+  const messageEl = document.getElementById('message-interaction');
+  const urlModele = "{% url 'comptes:interagir' action='ACTION' %}";
+
+  document.querySelectorAll('.action-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      const action = btn.dataset.action;
+      btn.disabled = true;
+
+      fetch(urlModele.replace('ACTION', action), {
+        method: 'POST',
+        headers: {'X-CSRFToken': csrftoken}
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.erreur) { return; }
+        affectionEl.textContent = data.affection;
+        niveauEl.textContent = data.niveau;
+        fillEl.style.width = data.progression + '%';
+        progressionEl.textContent = data.progression + '% jusqu\'au niveau ' + (data.niveau + 1);
+        messageEl.textContent = data.message;
+
+        frame.classList.remove('anim-jump', 'anim-pulse', 'anim-wiggle');
+        void frame.offsetWidth; // relance l'animation CSS
+        frame.classList.add(data.animation);
+
+        const gain = document.createElement('div');
+        gain.className = 'floating-gain';
+        gain.textContent = '+' + data.gain;
+        gain.style.left = '50%';
+        gain.style.top = '0';
+        frame.parentElement.style.position = 'relative';
+        frame.parentElement.appendChild(gain);
+        setTimeout(function() { gain.remove(); }, 1000);
+      })
+      .finally(function() { btn.disabled = false; });
+    });
+  });
+})();
+</script>
+{% endblock %}

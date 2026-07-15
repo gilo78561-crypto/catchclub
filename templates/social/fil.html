@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block titre %}CatchClub — Fil d'actualité{% endblock %}
+{% block contenu %}
+<div class="layout">
+
+  <div class="col">
+    <div class="trainer-card" style="--type-color:var(--type-{{ user.pokemone.type|default:'normal' }});">
+      <div class="trainer-card-inner">
+        <div class="trainer-head">
+          <div class="avatar-ball size-l" style="--type-color:var(--type-{{ user.pokemone.type|default:'normal' }});">
+            {% if user.pokemone.image %}<img src="{{ user.pokemone.image.url }}" alt="">{% endif %}
+          </div>
+          <div>
+            <div class="trainer-name">{{ user.username }}</div>
+            <div class="trainer-id">DRESSEUR #{{ user.id|stringformat:"05d" }}</div>
+            {% if user.pokemone %}
+              <span class="type-badge {{ user.pokemone.type }}" style="margin-top:4px;">{{ user.pokemone.get_type_display }} · {{ user.pokemone.nom }}</span>
+            {% endif %}
+          </div>
+        </div>
+        <div class="trainer-stats">
+          <div class="trainer-stat"><b>{{ user.nb_abonnes }}</b><span>Abonnés</span></div>
+          <div class="trainer-stat"><b>{{ user.groupes.count }}</b><span>Groupes</span></div>
+          <div class="trainer-stat"><b>{{ user.posts.count }}</b><span>Posts</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Navigation</div>
+      <ul>
+        <li><a href="{% url 'comptes:profil' user.username %}" class="side-link"><span class="ic">👤</span> Mon profil</a></li>
+        <li><a href="{% url 'comptes:mon_pokemon' %}" class="side-link"><span class="ic">🎮</span> Mon pokémon</a></li>
+        <li><a href="{% url 'social:fil' %}" class="side-link active"><span class="ic">🏠</span> Fil d'actualité</a></li>
+        <li><a href="{% url 'groupes:liste' %}" class="side-link"><span class="ic">👥</span> Groupes</a></li>
+        <li><a href="{% url 'messagerie:liste' %}" class="side-link"><span class="ic">💬</span> Messages</a></li>
+        <li><a href="{% url 'collection:ma_collection' %}" class="side-link"><span class="ic">🃏</span> Collection</a></li>
+        <li><a href="{% url 'admin:index' %}" class="side-link"><span class="ic">⚙️</span> Administration</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="col feed-col">
+    <form method="post" action="{% url 'social:publier' %}" enctype="multipart/form-data" class="composer">
+      {% csrf_token %}
+      <div class="avatar-ball size-m" style="--type-color:var(--type-{{ user.pokemone.type|default:'normal' }});"></div>
+      {{ form.contenu }}
+      <button type="submit" class="btn btn-primary">Publier</button>
+    </form>
+
+    {% for post in posts %}
+      <div class="post" style="--type-color:var(--type-{{ post.auteur.pokemone.type|default:'normal' }});">
+        <div class="post-head">
+          <a href="{% url 'comptes:profil' post.auteur.username %}">
+            <div class="avatar-ball size-m" style="--type-color:var(--type-{{ post.auteur.pokemone.type|default:'normal' }});">
+              {% if post.auteur.pokemone.image %}<img src="{{ post.auteur.pokemone.image.url }}" alt="">{% endif %}
+            </div>
+          </a>
+          <div>
+            <div class="post-author">
+              <a href="{% url 'comptes:profil' post.auteur.username %}" style="color:inherit;">{{ post.auteur.username }}</a>
+              {% if post.auteur.pokemone %}<span class="type-badge {{ post.auteur.pokemone.type }}" style="margin-left:6px;">{{ post.auteur.pokemone.get_type_display }}</span>{% endif %}
+            </div>
+            <div class="post-meta">{{ post.date_publication|timesince }}</div>
+          </div>
+        </div>
+        <div class="post-body">{{ post.contenu }}</div>
+        {% if post.image %}<div class="post-media" style="background-image:url('{{ post.image.url }}');background-size:cover;"></div>{% endif %}
+        <div class="post-actions">
+          <form method="post" action="{% url 'social:aimer' post.id %}" style="flex:1;">
+            {% csrf_token %}
+            <button type="submit" class="post-action" style="width:100%;">👍 J'aime · {{ post.nb_likes }}</button>
+          </form>
+          <div class="post-action" style="flex:1;">💬 {{ post.nb_commentaires }} commentaire{{ post.nb_commentaires|pluralize }}</div>
+        </div>
+        {% for commentaire in post.commentaires.all %}
+          <p class="text-muted" style="font-size:13px;margin:6px 0 0;"><b>{{ commentaire.auteur.username }}</b> {{ commentaire.contenu }}</p>
+        {% endfor %}
+        <form method="post" action="{% url 'social:commenter' post.id %}" style="display:flex;gap:8px;margin-top:8px;">
+          {% csrf_token %}
+          <input type="text" name="contenu" placeholder="Écrire un commentaire…" required>
+          <button type="submit" class="btn btn-ghost">Envoyer</button>
+        </form>
+      </div>
+    {% empty %}
+      <div class="card">
+        <p class="text-muted" style="font-size:13.5px;">Ton fil est vide pour l'instant. Abonne-toi à d'autres dresseurs pour voir leurs posts ici — ça débloque aussi leur carte dans ta collection !</p>
+      </div>
+    {% endfor %}
+  </div>
+
+  <div class="col">
+    <div class="card">
+      <div class="card-title">Mes groupes</div>
+      {% for groupe in user.groupes.all|slice:":4" %}
+        <div class="group-row">
+          <div class="group-thumb" style="background:var(--type-{{ groupe.type }});">{{ groupe.nom|slice:":1" }}</div>
+          <div><div class="group-name">{{ groupe.nom }}</div><div class="group-meta">{{ groupe.nb_membres }} membres</div></div>
+        </div>
+      {% empty %}
+        <p class="text-muted" style="font-size:13px;">Aucun groupe rejoint.</p>
+      {% endfor %}
+      <a href="{% url 'groupes:liste' %}" class="btn btn-ghost btn-block" style="margin-top:10px;">Voir tous les groupes</a>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

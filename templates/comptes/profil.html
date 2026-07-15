@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% load static %}
+{% block titre %}CatchClub — {{ dresseur.username }}{% endblock %}
+{% block contenu %}
+<div class="layout two-col">
+
+  <div class="col">
+    <div class="trainer-card" style="--type-color:var(--type-{{ dresseur.pokemone.type|default:'normal' }});">
+      <div class="trainer-card-inner">
+        <div style="text-align:center;">
+          {% if dresseur.pokemone.fichier_3d %}
+            <div class="viewer-3d-frame" style="--type-color:var(--type-{{ dresseur.pokemone.type|default:'normal' }});margin-bottom:10px;">
+              <model-viewer class="viewer-3d" src="{% static dresseur.pokemone.fichier_3d %}" camera-controls auto-rotate disable-zoom shadow-intensity="1"></model-viewer>
+            </div>
+          {% else %}
+            <div class="avatar-ball size-l" style="--type-color:var(--type-{{ dresseur.pokemone.type|default:'normal' }});margin:0 auto 10px;">
+              {% if dresseur.pokemone.image %}<img src="{{ dresseur.pokemone.image.url }}" alt="">{% endif %}
+            </div>
+          {% endif %}
+          <div class="trainer-name" style="font-size:19px;">{{ dresseur.username }}</div>
+          <div class="trainer-id">DRESSEUR #{{ dresseur.id|stringformat:"05d" }} · membre depuis {{ dresseur.date_inscription|date:"F Y" }}</div>
+          {% if dresseur.pokemone %}
+            <span class="type-badge {{ dresseur.pokemone.type }}" style="margin-top:8px;">{{ dresseur.pokemone.get_type_display }} · {{ dresseur.pokemone.nom }}</span>
+          {% endif %}
+          {% if dresseur.pokemone.presentation %}
+            <p class="text-muted" style="font-size:13px;margin-top:10px;">« {{ dresseur.pokemone.presentation }} »</p>
+          {% endif %}
+        </div>
+        <div class="trainer-stats">
+          <div class="trainer-stat"><b>{{ dresseur.nb_abonnes }}</b><span>Abonnés</span></div>
+          <div class="trainer-stat"><b>{{ dresseur.nb_abonnements }}</b><span>Abonnements</span></div>
+          <div class="trainer-stat"><b>{{ posts|length }}</b><span>Posts</span></div>
+        </div>
+
+        {% if est_soi_meme %}
+          <a href="{% url 'comptes:mon_pokemon' %}" class="btn btn-primary btn-block" style="margin-top:14px;">🎮 Interagir avec {{ dresseur.pokemone.nom }}</a>
+          <a href="{% url 'comptes:modifier_profil' %}" class="btn btn-ghost btn-block" style="margin-top:8px;">✏️ Modifier mon pokémone</a>
+        {% else %}
+          {% if suit_deja %}
+            <form method="post" action="{% url 'social:se_desabonner' dresseur.username %}" style="margin-top:14px;">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-ghost btn-block">✓ Abonné — se désabonner</button>
+            </form>
+          {% else %}
+            <form method="post" action="{% url 'social:suivre' dresseur.username %}" style="margin-top:14px;">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-primary btn-block">+ Suivre (débloque sa carte)</button>
+            </form>
+          {% endif %}
+          <a href="{% url 'messagerie:demarrer' dresseur.username %}" class="btn btn-ghost btn-block" style="margin-top:8px;">💬 Envoyer un message</a>
+        {% endif %}
+      </div>
+    </div>
+
+    {% if dresseur.bio %}
+      <div class="card">
+        <div class="card-title">À propos</div>
+        <p class="text-muted" style="font-size:13.5px;">{{ dresseur.bio }}</p>
+      </div>
+    {% endif %}
+  </div>
+
+  <div class="col feed-col">
+    <div class="card-title" style="margin-top:6px;">Publications</div>
+    {% for post in posts %}
+      <div class="post" style="--type-color:var(--type-{{ dresseur.pokemone.type|default:'normal' }});">
+        <div class="post-head">
+          <div class="avatar-ball size-m" style="--type-color:var(--type-{{ dresseur.pokemone.type|default:'normal' }});"></div>
+          <div>
+            <div class="post-author">{{ dresseur.username }}</div>
+            <div class="post-meta">{{ post.date_publication|timesince }}</div>
+          </div>
+        </div>
+        <div class="post-body">{{ post.contenu }}</div>
+        {% if post.image %}<div class="post-media" style="background-image:url('{{ post.image.url }}');background-size:cover;"></div>{% endif %}
+      </div>
+    {% empty %}
+      <p class="text-muted" style="font-size:13.5px;">Pas encore de publication.</p>
+    {% endfor %}
+  </div>
+
+</div>
+{% endblock %}

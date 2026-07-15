@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block titre %}CatchClub — {{ groupe.nom }}{% endblock %}
+{% block contenu %}
+<div class="layout center-only">
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:14px;">
+      <div class="group-thumb" style="background:var(--type-{{ groupe.type }});width:60px;height:60px;font-size:24px;">{{ groupe.nom|slice:":1" }}</div>
+      <div>
+        <h1 style="font-size:20px;">{{ groupe.nom }}</h1>
+        <span class="type-badge {{ groupe.type }}">{{ groupe.get_type_display }}</span>
+        <span class="text-muted" style="font-size:12.5px;margin-left:8px;">{{ groupe.nb_membres }} membres · {% if groupe.prive %}privé{% else %}public{% endif %}</span>
+      </div>
+    </div>
+    <p class="text-muted" style="margin-top:14px;">{{ groupe.description }}</p>
+
+    {% if est_membre %}
+      <form method="post" action="{% url 'groupes:quitter' groupe.pk %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-ghost btn-block">✓ Membre — quitter le groupe</button>
+      </form>
+    {% else %}
+      <form method="post" action="{% url 'groupes:rejoindre' groupe.pk %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary btn-block">Rejoindre le groupe</button>
+      </form>
+    {% endif %}
+  </div>
+
+  <div class="card" style="margin-top:16px;">
+    <div class="card-title">Membres</div>
+    {% for m in groupe.membres.all %}
+      <div class="group-row">
+        <div class="avatar-ball size-s" style="--type-color:var(--type-{{ m.pokemone.type|default:'normal' }});"></div>
+        <div><a href="{% url 'comptes:profil' m.username %}" class="group-name">{{ m.username }}</a></div>
+      </div>
+    {% empty %}
+      <p class="text-muted" style="font-size:13px;">Aucun membre pour l'instant.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

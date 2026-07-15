@@ -1,0 +1,46 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>{% block titre %}CatchClub{% endblock %}</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="{% static 'css/style.css' %}">
+<script type="module" src="https://unpkg.com/@google/model-viewer@3.5.0/dist/model-viewer.min.js"></script>
+</head>
+<body>
+
+{% if user.is_authenticated %}
+<header class="top-nav">
+  <a href="{% url 'social:fil' %}" class="brand"><span class="brand-mark"></span> CatchClub</a>
+  <div class="top-search">🔍 Rechercher un dresseur, un pokémone, un groupe…</div>
+  <div class="top-nav-icons">
+    <a href="{% url 'messagerie:liste' %}" class="icon-btn">💬</a>
+    <a href="{% url 'groupes:liste' %}" class="icon-btn">👥</a>
+    <a href="{% url 'collection:ma_collection' %}" class="icon-btn">🃏</a>
+    <a href="{% url 'comptes:mon_pokemon' %}" class="icon-btn">🎮</a>
+    <a href="{% url 'comptes:profil' user.username %}">
+      <div class="avatar-ball size-m" style="--type-color:var(--type-{{ user.pokemone.type|default:'normal' }});">
+        {% if user.pokemone.image %}<img src="{{ user.pokemone.image.url }}" alt="">{% endif %}
+      </div>
+    </a>
+    <form method="post" action="{% url 'comptes:deconnexion' %}" style="display:inline;">
+      {% csrf_token %}
+      <button type="submit" class="icon-btn" title="Déconnexion" style="border:none;">⏻</button>
+    </form>
+  </div>
+</header>
+{% endif %}
+
+{% if messages %}
+<div style="max-width:1240px;margin:14px auto 0;padding:0 20px;">
+  {% for message in messages %}
+    <div class="card" style="border-color:var(--accent);margin-bottom:8px;font-size:13.5px;">{{ message }}</div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% block contenu %}{% endblock %}
+
+</body>
+</html>

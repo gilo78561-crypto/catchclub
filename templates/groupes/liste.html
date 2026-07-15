@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block titre %}CatchClub — Groupes{% endblock %}
+{% block contenu %}
+<div class="layout two-col">
+
+  <div class="col">
+    <div class="card">
+      <div class="card-title">Parcourir par type</div>
+      <ul>
+        <li><a href="{% url 'groupes:liste' %}" class="side-link {% if not type_filtre %}active{% endif %}">Tous les types</a></li>
+        {% for valeur, libelle in types %}
+          <li><a href="?type={{ valeur }}" class="side-link {% if type_filtre == valeur %}active{% endif %}">
+            <span class="type-badge {{ valeur }}" style="margin-right:4px;"></span> {{ libelle }}
+          </a></li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Mes groupes</div>
+      {% for groupe in mes_groupes %}
+        <div class="group-row">
+          <div class="group-thumb" style="background:var(--type-{{ groupe.type }});">{{ groupe.nom|slice:":1" }}</div>
+          <div><div class="group-name">{{ groupe.nom }}</div><div class="group-meta">{{ groupe.nb_membres }} membres</div></div>
+        </div>
+      {% empty %}
+        <p class="text-muted" style="font-size:13px;">Aucun groupe rejoint.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="col feed-col">
+    <h1 style="font-size:22px;">Communautés</h1>
+    <p class="text-muted" style="font-size:13.5px;">Rejoins des dresseurs qui partagent le type de ton pokémone, ou explore les autres.</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:6px;">
+      {% for groupe in groupes %}
+        <div class="card">
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div class="group-thumb" style="background:var(--type-{{ groupe.type }});width:52px;height:52px;font-size:20px;">{{ groupe.nom|slice:":1" }}</div>
+            <div>
+              <div class="group-name" style="font-size:15px;">{{ groupe.nom }}</div>
+              <div class="group-meta">{{ groupe.nb_membres }} membres · {% if groupe.prive %}privé{% else %}public{% endif %}</div>
+            </div>
+          </div>
+          <p class="text-muted" style="font-size:13px;margin:10px 0;">{{ groupe.description }}</p>
+          <a href="{% url 'groupes:detail' groupe.pk %}" class="btn btn-ghost btn-block">Voir le groupe</a>
+        </div>
+      {% empty %}
+        <p class="text-muted">Aucun groupe pour ce type pour l'instant.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

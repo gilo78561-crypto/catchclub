@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block titre %}CatchClub — Modifier mon profil{% endblock %}
+{% block contenu %}
+<div class="layout center-only">
+  <h1 style="font-size:22px;">Modifier mon profil</h1>
+
+  <div class="card" style="margin-top:14px;">
+    <form method="post" enctype="multipart/form-data" novalidate>
+      {% csrf_token %}
+
+      <div class="card-title">Dresseur</div>
+      {% for field in form %}
+        <div class="field">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+        </div>
+      {% endfor %}
+
+      <div class="card-title" style="margin-top:18px;">Pokémone</div>
+      <div class="field">
+        <label for="{{ pokemon_form.nom.id_for_label }}">{{ pokemon_form.nom.label }}</label>
+        {{ pokemon_form.nom }}
+      </div>
+      <div class="field">
+        <label>{{ pokemon_form.type.label }}</label>
+        <div class="type-picker">
+          {% for radio in pokemon_form.type %}
+            {{ radio.tag }}
+            <label for="{{ radio.id_for_label }}" style="--type-color:var(--type-{{ radio.data.value }});">{{ radio.choice_label }}</label>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="field">
+        <label>{{ pokemon_form.modele_3d.label }}</label>
+        <div class="modele3d-picker">
+          {% for radio in pokemon_form.modele_3d %}
+            {{ radio.tag }}
+            <label for="{{ radio.id_for_label }}" class="modele3d-tile">
+              <span class="glyph">
+                {% if radio.data.value == 'raccoony' %}🦝
+                {% elif radio.data.value == 'rouage' %}🤖
+                {% elif radio.data.value == 'planetin' %}🪐
+                {% elif radio.data.value == 'astrelin' %}✨
+                {% elif radio.data.value == 'ailune' %}🦋
+                {% else %}🖼️{% endif %}
+              </span>
+              {{ radio.choice_label }}
+            </label>
+          {% endfor %}
+        </div>
+      </div>
+      <div class="field">
+        <label for="{{ pokemon_form.image.id_for_label }}">{{ pokemon_form.image.label }}</label>
+        {{ pokemon_form.image }}
+      </div>
+      <div class="field">
+        <label for="{{ pokemon_form.presentation.id_for_label }}">{{ pokemon_form.presentation.label }}</label>
+        {{ pokemon_form.presentation }}
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block">Enregistrer</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

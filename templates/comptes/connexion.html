@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block titre %}CatchClub — Connexion{% endblock %}
+{% block contenu %}
+<div class="auth-shell">
+  <h1 style="text-align:center;font-size:24px;"><span class="brand-mark" style="display:inline-block;vertical-align:middle;"></span> CatchClub</h1>
+  <p class="text-muted" style="text-align:center;font-size:13.5px;margin-top:6px;">Content de te revoir, dresseur.</p>
+
+  <div class="auth-card" style="margin-top:22px;">
+    <form method="post" novalidate>
+      {% csrf_token %}
+      {% if form.non_field_errors %}
+        <p class="helper-text" style="color:var(--accent);">{{ form.non_field_errors }}</p>
+      {% endif %}
+      {% for field in form %}
+        <div class="field">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+        </div>
+      {% endfor %}
+      <button type="submit" class="btn btn-primary btn-block">Se connecter</button>
+    </form>
+    <p class="helper-text" style="text-align:center;margin-top:14px;">
+      Pas encore de compte ? <a href="{% url 'comptes:inscription' %}" style="color:var(--accent-strong);">Rejoindre CatchClub</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

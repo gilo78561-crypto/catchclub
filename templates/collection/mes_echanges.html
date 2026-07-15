@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block titre %}CatchClub — Mes échanges{% endblock %}
+{% block contenu %}
+<div class="layout center-only">
+  <h1 style="font-size:22px;">Mes échanges</h1>
+
+  <div class="card" style="margin-top:14px;">
+    <div class="card-title">Reçus</div>
+    {% for e in recus %}
+      <div class="group-row">
+        <div class="avatar-ball size-s" style="--type-color:var(--type-{{ e.proposant.pokemone.type|default:'normal' }});"></div>
+        <div style="flex:1;">
+          <div class="group-name">{{ e.proposant.username }}</div>
+          <div class="group-meta">Propose {{ e.carte_proposee.pokemone.nom }} contre ton {{ e.carte_demandee.pokemone.nom }}</div>
+        </div>
+        {% if e.statut == 'en_attente' %}
+          <form method="post" action="{% url 'collection:repondre_echange' e.pk 'accepter' %}">
+            {% csrf_token %}<button type="submit" class="btn btn-primary" style="padding:6px 12px;font-size:12px;">Accepter</button>
+          </form>
+          <form method="post" action="{% url 'collection:repondre_echange' e.pk 'refuser' %}">
+            {% csrf_token %}<button type="submit" class="btn btn-ghost" style="padding:6px 12px;font-size:12px;">Refuser</button>
+          </form>
+        {% else %}
+          <span class="type-badge outline normal">{{ e.get_statut_display }}</span>
+        {% endif %}
+      </div>
+    {% empty %}
+      <p class="text-muted" style="font-size:13px;">Aucun échange reçu.</p>
+    {% endfor %}
+  </div>
+
+  <div class="card" style="margin-top:16px;">
+    <div class="card-title">Envoyés</div>
+    {% for e in envoyes %}
+      <div class="group-row">
+        <div class="avatar-ball size-s" style="--type-color:var(--type-{{ e.receveur.pokemone.type|default:'normal' }});"></div>
+        <div style="flex:1;">
+          <div class="group-name">{{ e.receveur.username }}</div>
+          <div class="group-meta">Tu proposes {{ e.carte_proposee.pokemone.nom }} contre {{ e.carte_demandee.pokemone.nom }}</div>
+        </div>
+        <span class="type-badge outline normal">{{ e.get_statut_display }}</span>
+      </div>
+    {% empty %}
+      <p class="text-muted" style="font-size:13px;">Aucun échange envoyé.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

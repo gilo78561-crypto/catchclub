@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block titre %}CatchClub — Échanger avec {{ autre.username }}{% endblock %}
+{% block contenu %}
+<div class="layout center-only" style="max-width:900px;">
+  <h1 style="font-size:22px;">Échange avec {{ autre.username }}</h1>
+  <p class="text-muted" style="font-size:13.5px;">Choisis une de tes cartes à proposer, et celle que tu veux recevoir en retour.</p>
+
+  <div class="card" style="margin-top:14px;">
+    <form method="post">
+      {% csrf_token %}
+      <div class="trade-shell">
+        <div>
+          <div class="trade-panel-title"><b>Tu proposes</b></div>
+          {% for carte in mes_cartes %}
+            <div class="offer-row">
+              <input type="radio" name="carte_proposee" value="{{ carte.id }}" id="mc{{ carte.id }}" required>
+              <label for="mc{{ carte.id }}" style="display:flex;align-items:center;gap:8px;flex:1;margin:0;font-weight:400;">
+                <div class="avatar-ball size-s" style="--type-color:var(--type-{{ carte.pokemone.type }});"></div>
+                {{ carte.pokemone.nom }} <span class="type-badge {{ carte.pokemone.type }}">{{ carte.pokemone.get_type_display }}</span>
+              </label>
+            </div>
+          {% empty %}
+            <p class="text-muted" style="font-size:13px;">Tu n'as pas encore de carte à proposer.</p>
+          {% endfor %}
+        </div>
+
+        <div class="trade-mid">🔁</div>
+
+        <div>
+          <div class="trade-panel-title"><b>Tu demandes</b></div>
+          {% for carte in ses_cartes %}
+            <div class="offer-row">
+              <input type="radio" name="carte_demandee" value="{{ carte.id }}" id="sc{{ carte.id }}" required>
+              <label for="sc{{ carte.id }}" style="display:flex;align-items:center;gap:8px;flex:1;margin:0;font-weight:400;">
+                <div class="avatar-ball size-s" style="--type-color:var(--type-{{ carte.pokemone.type }});"></div>
+                {{ carte.pokemone.nom }} <span class="type-badge {{ carte.pokemone.type }}">{{ carte.pokemone.get_type_display }}</span>
+              </label>
+            </div>
+          {% empty %}
+            <p class="text-muted" style="font-size:13px;">{{ autre.username }} n'a pas encore de carte disponible.</p>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;margin-top:22px;border-top:1px solid var(--border);padding-top:16px;">
+        <a href="{% url 'collection:ma_collection' %}" class="btn btn-ghost" style="flex:1;">Annuler</a>
+        <button type="submit" class="btn btn-primary" style="flex:2;">Envoyer la proposition d'échange</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

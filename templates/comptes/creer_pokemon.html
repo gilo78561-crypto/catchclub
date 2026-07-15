@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block titre %}CatchClub — Créer ton pokémone{% endblock %}
+{% block contenu %}
+<div class="auth-shell">
+  <p class="eyebrow" style="text-align:center;margin-bottom:6px;">Étape 2 / 2</p>
+  <h1 style="text-align:center;font-size:24px;">Crée ton pokémone</h1>
+  <p class="text-muted" style="text-align:center;font-size:13.5px;margin-top:6px;">
+    Il n'existe nulle part ailleurs. Nom, type et apparence : c'est toi qui décides.
+  </p>
+
+  <div class="auth-card" style="margin-top:22px;">
+    <div class="progress-steps"><span class="done"></span><span class="done"></span></div>
+
+    <form method="post" enctype="multipart/form-data" novalidate>
+      {% csrf_token %}
+      <div class="field">
+        <label for="{{ form.nom.id_for_label }}">{{ form.nom.label }}</label>
+        {{ form.nom }}
+        <p class="helper-text">Ce nom apparaît partout sur ton profil et tes posts.</p>
+        {% for error in form.nom.errors %}<p class="helper-text" style="color:var(--accent);">{{ error }}</p>{% endfor %}
+      </div>
+
+      <div class="field">
+        <label>{{ form.type.label }}</label>
+        <div class="type-picker">
+          {% for radio in form.type %}
+            {{ radio.tag }}
+            <label for="{{ radio.id_for_label }}" style="--type-color:var(--type-{{ radio.data.value }});">{{ radio.choice_label }}</label>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="field">
+        <label>{{ form.modele_3d.label }}</label>
+        <div class="modele3d-picker">
+          {% for radio in form.modele_3d %}
+            {{ radio.tag }}
+            <label for="{{ radio.id_for_label }}" class="modele3d-tile">
+              <span class="glyph">
+                {% if radio.data.value == 'raccoony' %}🦝
+                {% elif radio.data.value == 'rouage' %}🤖
+                {% elif radio.data.value == 'planetin' %}🪐
+                {% elif radio.data.value == 'astrelin' %}✨
+                {% elif radio.data.value == 'ailune' %}🦋
+                {% else %}🖼️{% endif %}
+              </span>
+              {{ radio.choice_label }}
+            </label>
+          {% endfor %}
+        </div>
+        <p class="helper-text">Choisis une apparence 3D toute prête, ou laisse "Aucun" pour utiliser une image ci-dessous.</p>
+      </div>
+
+      <div class="field">
+        <label for="{{ form.image.id_for_label }}">{{ form.image.label }}</label>
+        <div style="display:flex;gap:14px;align-items:center;background:var(--surface-alt);border:1px solid var(--border);border-radius:var(--radius-s);padding:14px;">
+          <div class="avatar-ball size-l" style="--type-color:var(--type-eau);"></div>
+          <div style="flex:1;">
+            {{ form.image }}
+            <p class="helper-text">PNG/JPG, fond transparent conseillé. Utilisé si aucun modèle 3D n'est choisi.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="{{ form.presentation.id_for_label }}">{{ form.presentation.label }}</label>
+        {{ form.presentation }}
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block">Rejoindre CatchClub</button>
+    </form>
+  </div>
+</div>
+{% endblock %}
