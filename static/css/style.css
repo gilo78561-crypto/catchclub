@@ -192,6 +192,81 @@ h1, h2, h3, h4 {
 }
 
 /* ============================================================
+   MOBILE (≤ 640px) — header empilable, chat et échange en colonne
+   ============================================================ */
+@media (max-width: 640px) {
+  html, body { font-size: 14px; overflow-x: hidden; }
+
+  .top-nav {
+    flex-wrap: wrap;
+    gap: 8px 10px;
+    padding: 10px 14px;
+  }
+  .brand { font-size: 15px; gap: 8px; }
+  .brand-mark { width: 24px; height: 24px; }
+  .top-search {
+    order: 3;
+    flex-basis: 100%;
+    max-width: none;
+  }
+  .top-nav-icons { gap: 6px; }
+  .icon-btn { width: 32px; height: 32px; font-size: 14px; }
+
+  .layout, .layout.two-col, .layout.center-only {
+    padding: 0 12px;
+    gap: 14px;
+    margin: 14px auto;
+  }
+
+  .auth-shell { margin: 24px auto; padding: 0 14px; }
+  .auth-card { padding: 18px; }
+
+  .trainer-card-inner, .card { padding: 14px; }
+
+  .card-grid {
+    grid-template-columns: repeat(auto-fill, minmax(115px, 1fr));
+    gap: 10px;
+  }
+
+  .composer { flex-wrap: wrap; }
+  .composer-input { flex-basis: 100%; order: 3; }
+
+  .post-actions { flex-wrap: wrap; }
+
+  /* Messagerie : liste des conversations au-dessus, fenêtre en dessous */
+  .chat-shell {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+  .chat-list {
+    max-height: 180px;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+  .chat-window { height: 62vh; }
+  .chat-header { flex-wrap: wrap; gap: 8px; }
+  .bubble { max-width: 85%; }
+
+  /* Échange de cartes : colonnes empilées, flèche horizontale */
+  .trade-shell {
+    grid-template-columns: 1fr;
+  }
+  .trade-mid {
+    padding-top: 0;
+    flex-direction: row;
+    justify-content: center;
+  }
+
+  /* Page "Mon pokémon" */
+  .grand-viewer-frame { max-width: 260px; }
+  .action-row { max-width: none; }
+
+  .modele3d-picker, .type-picker {
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  }
+}
+
+/* ============================================================
    CARTE DRESSEUR — élément signature
    Bordure = couleur du type du pokémon du dresseur (façon carte à collectionner)
    ============================================================ */
