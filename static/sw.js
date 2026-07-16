@@ -1,8 +1,13 @@
 // Service worker CatchClub — mise en cache légère pour un fonctionnement
 // "application" (icône, plein écran) et un minimum hors-ligne.
 // Volontairement simple : pas de mise en cache des modèles 3D (trop lourds).
-
-const CACHE_NAME = 'catchclub-v1';
+//
+// IMPORTANT : le numéro de version ci-dessous doit être incrémenté à
+// chaque fois qu'on modifie ce fichier (ou qu'on veut forcer les
+// téléphones à réévaluer leur cache). Le nom de fichier sw.js ne
+// change jamais, donc c'est ce numéro qui permet au navigateur de
+// détecter qu'il y a une nouvelle version à installer.
+const CACHE_NAME = 'catchclub-v2';
 const PRECACHE_URLS = [
   '/static/css/style.css',
   '/static/icons/icon-192.png',
@@ -35,9 +40,24 @@ self.addEventListener('fetch', (event) => {
   }
 
   if (url.pathname.startsWith('/static/')) {
-    // Fichiers statiques : cache d'abord, réseau en secours.
+    // Fichiers statiques : on sert le cache immédiatement s'il existe
+    // (rapide), MAIS on relance systématiquement une requête réseau en
+    // arrière-plan pour rafraîchir le cache — ainsi, une mise à jour du
+    // CSS ou d'une icône est visible dès le rechargement suivant, sans
+    // rester bloqué sur une version périmée indéfiniment ("stale-while-
+    // revalidate").
     event.respondWith(
-      caches.match(event.request).then((cached) => cached || fetch(event.request))
+      caches.open(CACHE_NAME).then((cache) =>
+        cache.match(event.request).then((cached) => {
+          const enReseau = fetch(event.request)
+            .then((response) => {
+              if (response.ok) cache.put(event.request, response.clone());
+              return response;
+            })
+            .catch(() => cached);
+          return cached || enReseau;
+        })
+      )
     );
   } else if (event.request.mode === 'navigate') {
     // Pages : réseau d'abord (contenu à jour), cache en secours si hors-ligne.
