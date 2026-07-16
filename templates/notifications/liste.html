@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block titre %}CatchClub — Notifications{% endblock %}
+{% block contenu %}
+<div class="layout center-only">
+  <h1 style="font-size:22px;margin-bottom:14px;">Notifications</h1>
+
+  <div class="card">
+    {% for notif in notifications %}
+      {% if notif.lien %}
+        <a href="{{ notif.lien }}" class="group-row" style="display:flex;{% if not notif.lu %}background:var(--accent-soft);border-radius:var(--radius-s);{% endif %}">
+          <div style="flex:1;">
+            <div class="group-name" style="font-weight:{% if notif.lu %}400{% else %}600{% endif %};">{{ notif.texte }}</div>
+            <div class="group-meta">{{ notif.date_creation|timesince }}</div>
+          </div>
+        </a>
+      {% else %}
+        <div class="group-row" style="{% if not notif.lu %}background:var(--accent-soft);border-radius:var(--radius-s);{% endif %}">
+          <div style="flex:1;">
+            <div class="group-name" style="font-weight:{% if notif.lu %}400{% else %}600{% endif %};">{{ notif.texte }}</div>
+            <div class="group-meta">{{ notif.date_creation|timesince }}</div>
+          </div>
+        </div>
+      {% endif %}
+    {% empty %}
+      <p class="text-muted" style="font-size:13.5px;">Rien de neuf pour l'instant. Les nouveaux abonnés, likes, commentaires et échanges apparaîtront ici.</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

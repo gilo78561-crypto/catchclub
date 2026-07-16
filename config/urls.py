@@ -23,6 +23,7 @@ urlpatterns = [
     path('groupes/', include('groupes.urls')),
     path('collection/', include('collection.urls')),
     path('messages/', include('messagerie.urls')),
+    path('notifications/', include('notifications.urls')),
 ]
 
 # NB : servir les médias depuis Django (plutôt qu'un stockage externe type S3)

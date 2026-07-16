@@ -6,6 +6,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from .models import PossessionCarte, Echange
+from notifications.models import Notification
 
 Dresseur = get_user_model()
 
@@ -35,6 +36,7 @@ def proposer_echange(request, username):
             proposant=request.user, receveur=autre,
             carte_proposee=carte_proposee, carte_demandee=carte_demandee,
         )
+        Notification.creer(autre, f"{request.user.username} te propose un échange de cartes.", '/collection/echanges/')
         messages.success(request, f"Proposition d'échange envoyée à {autre.username}.")
         return redirect('collection:mes_echanges')
 
@@ -61,9 +63,11 @@ def repondre_echange(request, pk, decision):
         c1.save()
         c2.save()
         echange.statut = 'acceptee'
+        Notification.creer(echange.proposant, f"{request.user.username} a accepté ton échange !", '/collection/echanges/')
         messages.success(request, 'Échange conclu !')
     else:
         echange.statut = 'refusee'
+        Notification.creer(echange.proposant, f"{request.user.username} a refusé ton échange.", '/collection/echanges/')
         messages.info(request, 'Échange refusé.')
     echange.date_reponse = timezone.now()
     echange.save()

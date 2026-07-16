@@ -2,12 +2,13 @@ from django.conf import settings
 from django.db import models
 
 Dresseur = settings.AUTH_USER_MODEL
+EXTENSIONS_VIDEO = ('.mp4', '.webm', '.mov', '.ogg')
 
 
 class Post(models.Model):
     auteur = models.ForeignKey(Dresseur, on_delete=models.CASCADE, related_name='posts')
-    contenu = models.TextField('contenu', max_length=1000)
-    image = models.ImageField('image', upload_to='posts/', blank=True, null=True)
+    contenu = models.TextField('contenu', max_length=1000, blank=True)
+    media = models.FileField('photo ou vidéo', upload_to='posts/', blank=True, null=True)
     date_publication = models.DateTimeField(auto_now_add=True)
     aimes_par = models.ManyToManyField(Dresseur, related_name='posts_aimes', blank=True)
 
@@ -30,6 +31,14 @@ class Post(models.Model):
     @property
     def commentaires_principaux(self):
         return self.commentaires.filter(parent__isnull=True)
+
+    @property
+    def est_video(self):
+        return bool(self.media) and self.media.name.lower().endswith(EXTENSIONS_VIDEO)
+
+    @property
+    def est_image(self):
+        return bool(self.media) and not self.est_video
 
 
 class Commentaire(models.Model):

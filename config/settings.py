@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'groupes',
     'collection',
     'messagerie',
+    'notifications',
 ]
 
 MIDDLEWARE = [
@@ -76,6 +77,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'notifications.context_processors.notifications_non_lues',
             ],
         },
     },

@@ -2,11 +2,14 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
 
 from .models import Post, Commentaire, Abonnement
 from .forms import PostForm, CommentaireForm
+from .mentions import extraire_mentions
+from notifications.models import Notification
 
 Dresseur = get_user_model()
 
@@ -33,7 +36,11 @@ def publier(request):
         post = form.save(commit=False)
         post.auteur = request.user
         post.save()
+        for mentionne in extraire_mentions(post.contenu, exclure=request.user):
+            Notification.creer(mentionne, f"{request.user.username} t'a mentionné dans une publication.", '/')
         messages.success(request, 'Publié !')
+    else:
+        messages.error(request, 'Écris un texte ou ajoute une photo/vidéo avant de publier.')
     return redirect('social:fil')
 
 
@@ -45,6 +52,8 @@ def aimer(request, post_id):
         post.aimes_par.remove(request.user)
     else:
         post.aimes_par.add(request.user)
+        if post.auteur != request.user:
+            Notification.creer(post.auteur, f"{request.user.username} a aimé ta publication.", '/')
     return redirect(request.META.get('HTTP_REFERER', 'social:fil'))
 
 
@@ -61,6 +70,20 @@ def commenter(request, post_id):
         if parent_id:
             commentaire.parent = get_object_or_404(Commentaire, id=parent_id, post=post)
         commentaire.save()
+
+        if commentaire.parent:
+            if commentaire.parent.auteur != request.user:
+                Notification.creer(commentaire.parent.auteur, f"{request.user.username} a répondu à ton commentaire.", '/')
+        elif post.auteur != request.user:
+            Notification.creer(post.auteur, f"{request.user.username} a commenté ta publication.", '/')
+
+        deja_notifies = {request.user.id, post.auteur_id}
+        if commentaire.parent:
+            deja_notifies.add(commentaire.parent.auteur_id)
+        for mentionne in extraire_mentions(commentaire.contenu, exclure=request.user):
+            if mentionne.id not in deja_notifies:
+                Notification.creer(mentionne, f"{request.user.username} t'a mentionné dans un commentaire.", '/')
+                deja_notifies.add(mentionne.id)
     return redirect(request.META.get('HTTP_REFERER', 'social:fil'))
 
 
@@ -70,7 +93,9 @@ def suivre(request, username):
     """Le dresseur connecté s'abonne à un autre dresseur (débloque sa carte, voir collection.signals)."""
     cible = get_object_or_404(Dresseur, username=username)
     if cible != request.user:
-        Abonnement.objects.get_or_create(suiveur=request.user, suivi=cible)
+        _, cree = Abonnement.objects.get_or_create(suiveur=request.user, suivi=cible)
+        if cree:
+            Notification.creer(cible, f"{request.user.username} te suit maintenant.", f'/comptes/profil/{request.user.username}/')
         messages.success(request, f"Tu suis maintenant {cible.username}.")
     return redirect('comptes:profil', username=username)
 
@@ -99,3 +124,18 @@ def rechercher(request):
         groupes = Groupe.objects.filter(nom__icontains=q)
 
     return render(request, 'social/recherche.html', {'q': q, 'dresseurs': dresseurs, 'groupes': groupes})
+
+
+@login_required
+def suggestions_mention(request):
+    """Utilisé par l'autocomplétion JS des zones de texte (posts, commentaires) :
+    renvoie jusqu'à 8 pseudos correspondant à ce qui suit le '@' tapé."""
+    q = request.GET.get('q', '').strip()
+    resultats = []
+    if q:
+        dresseurs = Dresseur.objects.filter(username__istartswith=q).exclude(id=request.user.id).select_related('pokemone')[:8]
+        resultats = [
+            {'username': d.username, 'pokemone': d.pokemone.nom if d.a_un_pokemone() else ''}
+            for d in dresseurs
+        ]
+    return JsonResponse({'resultats': resultats})

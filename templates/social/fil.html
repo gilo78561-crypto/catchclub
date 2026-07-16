@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load social_extras %}
 {% block titre %}CatchClub — Fil d'actualité{% endblock %}
 {% block contenu %}
 <div class="layout">
@@ -47,7 +48,12 @@
       {% csrf_token %}
       <div class="avatar-ball size-m" style="--type-color:var(--type-{{ user.pokemone.type|default:'normal' }});"></div>
       {{ form.contenu }}
+      <label class="icon-btn" title="Ajouter une photo ou une vidéo" style="cursor:pointer;">
+        📷
+        <input type="file" name="media" accept="image/*,video/*" style="display:none;" onchange="document.getElementById('apercu-composer').textContent = this.files[0] ? '📎 ' + this.files[0].name : '';">
+      </label>
       <button type="submit" class="btn btn-primary">Publier</button>
+      <span id="apercu-composer" class="text-faint" style="font-size:11px;flex-basis:100%;"></span>
     </form>
 
     {% for post in posts %}
@@ -66,8 +72,12 @@
             <div class="post-meta">{{ post.date_publication|timesince }}</div>
           </div>
         </div>
-        <div class="post-body">{{ post.contenu }}</div>
-        {% if post.image %}<div class="post-media" style="background-image:url('{{ post.image.url }}');background-size:cover;"></div>{% endif %}
+        <div class="post-body">{{ post.contenu|mentions }}</div>
+        {% if post.est_image %}
+          <div class="post-media" style="background-image:url('{{ post.media.url }}');background-size:cover;"></div>
+        {% elif post.est_video %}
+          <video src="{{ post.media.url }}" controls style="width:100%;border-radius:var(--radius-s);border:1px solid var(--border);margin-bottom:12px;max-height:360px;"></video>
+        {% endif %}
         <div class="post-actions">
           <form method="post" action="{% url 'social:aimer' post.id %}" style="flex:1;">
             {% csrf_token %}
@@ -77,23 +87,23 @@
         </div>
         {% for commentaire in post.commentaires_principaux %}
           <div class="commentaire-bloc" style="margin-top:8px;">
-            <p class="text-muted" style="font-size:13px;margin:0;"><b>{{ commentaire.auteur.username }}</b> {{ commentaire.contenu }}
+            <p class="text-muted" style="font-size:13px;margin:0;"><b>{{ commentaire.auteur.username }}</b> {{ commentaire.contenu|mentions }}
               <button type="button" class="lien-repondre" onclick="document.getElementById('reponse-{{ commentaire.id }}').classList.toggle('cache')" style="background:none;border:none;color:var(--accent-strong);font-size:12px;cursor:pointer;padding:0;margin-left:6px;">Répondre</button>
             </p>
             {% for reponse in commentaire.reponses.all %}
-              <p class="text-muted" style="font-size:12.5px;margin:4px 0 0 20px;border-left:2px solid var(--border);padding-left:8px;"><b>{{ reponse.auteur.username }}</b> {{ reponse.contenu }}</p>
+              <p class="text-muted" style="font-size:12.5px;margin:4px 0 0 20px;border-left:2px solid var(--border);padding-left:8px;"><b>{{ reponse.auteur.username }}</b> {{ reponse.contenu|mentions }}</p>
             {% endfor %}
             <form method="post" action="{% url 'social:commenter' post.id %}" id="reponse-{{ commentaire.id }}" class="cache" style="display:flex;gap:6px;margin:6px 0 0 20px;">
               {% csrf_token %}
               <input type="hidden" name="parent_id" value="{{ commentaire.id }}">
-              <input type="text" name="contenu" placeholder="Répondre à {{ commentaire.auteur.username }}…" required style="font-size:12.5px;">
+              <input type="text" name="contenu" placeholder="Répondre à {{ commentaire.auteur.username }}…" required style="font-size:12.5px;" data-mention-input="1">
               <button type="submit" class="btn btn-ghost" style="padding:6px 10px;font-size:12px;">Envoyer</button>
             </form>
           </div>
         {% endfor %}
         <form method="post" action="{% url 'social:commenter' post.id %}" style="display:flex;gap:8px;margin-top:8px;">
           {% csrf_token %}
-          <input type="text" name="contenu" placeholder="Écrire un commentaire…" required>
+          <input type="text" name="contenu" placeholder="Écrire un commentaire…" required data-mention-input="1">
           <button type="submit" class="btn btn-ghost">Envoyer</button>
         </form>
       </div>

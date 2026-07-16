@@ -34,6 +34,7 @@
     <a href="{% url 'groupes:liste' %}" class="icon-btn">👥</a>
     <a href="{% url 'collection:ma_collection' %}" class="icon-btn">🃏</a>
     <a href="{% url 'comptes:mon_pokemon' %}" class="icon-btn">🎮</a>
+    <a href="{% url 'notifications:liste' %}" class="icon-btn">🔔{% if nb_notifications_non_lues %}<span class="dot"></span>{% endif %}</a>
     <a href="{% url 'comptes:profil' user.username %}">
       <div class="avatar-ball size-m" style="--type-color:var(--type-{{ user.pokemone.type|default:'normal' }});">
         {% if user.pokemone.image %}<img src="{{ user.pokemone.image.url }}" alt="">{% endif %}
@@ -66,6 +67,74 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
+
+{% if user.is_authenticated %}
+<script>
+(function () {
+  var csrftoken = document.cookie.split('; ').find(function (c) { return c.startsWith('csrftoken='); });
+  csrftoken = csrftoken ? csrftoken.split('=')[1] : '';
+  var urlSuggestions = "{% url 'social:suggestions_mention' %}";
+  var box = null;
+
+  function fermerBox() {
+    if (box) { box.remove(); box = null; }
+  }
+
+  function motMentionCourant(el) {
+    var pos = el.selectionStart;
+    var avant = el.value.slice(0, pos);
+    var m = avant.match(/@([A-Za-z0-9_]*)$/);
+    return m ? m[1] : null;
+  }
+
+  function positionnerBox(el) {
+    var rect = el.getBoundingClientRect();
+    box.style.position = 'fixed';
+    box.style.top = rect.bottom + 4 + 'px';
+    box.style.left = rect.left + 'px';
+  }
+
+  function initMentionInput(el) {
+    el.addEventListener('input', function () {
+      var mot = motMentionCourant(el);
+      fermerBox();
+      if (mot === null || mot.length === 0) { return; }
+
+      fetch(urlSuggestions + '?q=' + encodeURIComponent(mot))
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          if (!data.resultats.length) return;
+          box = document.createElement('div');
+          box.className = 'mention-suggestions';
+          data.resultats.forEach(function (d) {
+            var item = document.createElement('div');
+            item.className = 'mention-suggestion-item';
+            item.innerHTML = '@' + d.username + (d.pokemone ? ' <span class="pkm">' + d.pokemone + '</span>' : '');
+            item.addEventListener('mousedown', function (e) {
+              e.preventDefault();
+              var val = el.value;
+              var pos = el.selectionStart;
+              var avant = val.slice(0, pos).replace(/@([A-Za-z0-9_]*)$/, '@' + d.username + ' ');
+              var apres = val.slice(pos);
+              el.value = avant + apres;
+              el.focus();
+              fermerBox();
+            });
+            box.appendChild(item);
+          });
+          document.body.appendChild(box);
+          positionnerBox(el);
+        });
+    });
+
+    el.addEventListener('blur', function () { setTimeout(fermerBox, 150); });
+    el.addEventListener('keydown', function (e) { if (e.key === 'Escape') fermerBox(); });
+  }
+
+  document.querySelectorAll('[data-mention-input]').forEach(initMentionInput);
+})();
+</script>
+{% endif %}
 
 </body>
 </html>

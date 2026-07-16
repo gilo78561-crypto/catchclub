@@ -224,7 +224,55 @@ Ce que ça ajoute techniquement :
 push, par exemple), mais ça donne l'expérience "icône + plein écran" que
 tu voulais, sans code supplémentaire côté utilisateur.
 
-## 15. Prochaines pistes (non incluses)
+## 16. Notifications
+
+La cloche 🔔 du header (jusque-là décorative) est maintenant fonctionnelle :
+un point rouge apparaît quand il y a du nouveau, et la page
+`/notifications/` liste les événements qui te concernent — nouvel
+abonné, like, commentaire (ou réponse à ton commentaire), proposition
+d'échange reçue, échange accepté/refusé. Ouvrir la page marque tout
+comme lu. Ce sont des notifications **dans le site** (pas des
+notifications push qui arrivent même site fermé — ça demanderait une
+mise en place différente, dis-le-moi si c'est ce dont tu as besoin).
+
+## 17. Correctif important — bug d'affichage mobile
+
+Les essais précédents d'adaptation mobile ne s'appliquaient pas
+vraiment : les règles CSS étaient placées trop tôt dans le fichier
+`style.css`, avant les styles de base qu'elles étaient censées
+corriger — en CSS, à règle "aussi précise", c'est toujours la dernière
+déclarée dans le fichier qui l'emporte. Tout le bloc mobile a été
+déplacé à la toute fin du fichier, ce qui corrige l'affichage sur
+téléphone pour toutes les pages (groupes, collection, échange,
+messagerie, mon pokémon...).
+
+## 19. Photos et vidéos dans les publications
+
+Le composer du fil d'actualité a maintenant un bouton 📷 pour joindre une
+photo **ou** une vidéo à une publication (en plus ou à la place du texte).
+Comme pour la messagerie, un post peut être : texte seul, média seul, ou
+les deux — mais pas vide. Affichage automatique en `<img>` ou `<video>`
+selon le type de fichier envoyé.
+
+## 21. Mentions "@pseudo"
+
+Dans le composer d'un post, un commentaire ou une réponse, taper `@` suivi
+de quelques lettres fait apparaître une liste de dresseurs à cliquer pour
+compléter automatiquement (autocomplétion en JS pur, `social/views.py` →
+`suggestions_mention`). Une fois publié :
+- le `@pseudo` devient un **lien cliquable** vers le profil mentionné
+  (rendu par le filtre de template `|mentions`, `social/templatetags/`),
+- le dresseur mentionné reçoit une **notification** ("X t'a mentionné
+  dans une publication/commentaire"), sauf s'il est déjà notifié pour la
+  même action (auteur du post, du commentaire parent...).
+
+⚠️ **Limite actuelle** : les mentions fonctionnent dans le fil principal
+(posts et commentaires). Les groupes n'ont pour l'instant pas leur propre
+mur de publications séparé (juste une liste de membres) — si tu veux que
+chaque groupe ait son propre fil où mentionner ses membres, dis-le-moi,
+c'est une fonctionnalité à part entière à construire.
+
+## 22. Prochaines pistes (non incluses)
 
 - Notifications en temps réel (WebSocket / Django Channels).
 - Recherche réelle (actuellement la barre de recherche est visuelle).

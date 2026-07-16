@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static social_extras %}
 {% block titre %}CatchClub — {{ dresseur.username }}{% endblock %}
 {% block contenu %}
 <div class="layout two-col">
@@ -72,8 +72,12 @@
             <div class="post-meta">{{ post.date_publication|timesince }}</div>
           </div>
         </div>
-        <div class="post-body">{{ post.contenu }}</div>
-        {% if post.image %}<div class="post-media" style="background-image:url('{{ post.image.url }}');background-size:cover;"></div>{% endif %}
+        <div class="post-body">{{ post.contenu|mentions }}</div>
+        {% if post.est_image %}
+          <div class="post-media" style="background-image:url('{{ post.media.url }}');background-size:cover;"></div>
+        {% elif post.est_video %}
+          <video src="{{ post.media.url }}" controls style="width:100%;border-radius:var(--radius-s);border:1px solid var(--border);margin-bottom:12px;max-height:360px;"></video>
+        {% endif %}
       </div>
     {% empty %}
       <p class="text-muted" style="font-size:13.5px;">Pas encore de publication.</p>

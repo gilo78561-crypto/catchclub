@@ -187,83 +187,10 @@ h1, h2, h3, h4 {
 .col.feed-col { position: static; }
 
 @media (max-width: 1020px) {
-  .layout { grid-template-columns: 1fr; }
-  .col { position: static; }
-}
-
-/* ============================================================
-   MOBILE (≤ 640px) — header empilable, chat et échange en colonne
-   ============================================================ */
-@media (max-width: 640px) {
-  html, body { font-size: 14px; overflow-x: hidden; }
-
-  .top-nav {
-    flex-wrap: wrap;
-    gap: 8px 10px;
-    padding: 10px 14px;
-  }
-  .brand { font-size: 15px; gap: 8px; }
-  .brand-mark { width: 24px; height: 24px; }
-  .top-search {
-    order: 3;
-    flex-basis: 100%;
-    max-width: none;
-  }
-  .top-nav-icons { gap: 6px; }
-  .icon-btn { width: 32px; height: 32px; font-size: 14px; }
-
   .layout, .layout.two-col, .layout.center-only {
-    padding: 0 12px;
-    gap: 14px;
-    margin: 14px auto;
-  }
-
-  .auth-shell { margin: 24px auto; padding: 0 14px; }
-  .auth-card { padding: 18px; }
-
-  .trainer-card-inner, .card { padding: 14px; }
-
-  .card-grid {
-    grid-template-columns: repeat(auto-fill, minmax(115px, 1fr));
-    gap: 10px;
-  }
-
-  .composer { flex-wrap: wrap; }
-  .composer-input { flex-basis: 100%; order: 3; }
-
-  .post-actions { flex-wrap: wrap; }
-
-  /* Messagerie : liste des conversations au-dessus, fenêtre en dessous */
-  .chat-shell {
-    grid-template-columns: 1fr;
-    height: auto;
-  }
-  .chat-list {
-    max-height: 180px;
-    border-right: none;
-    border-bottom: 1px solid var(--border);
-  }
-  .chat-window { height: 62vh; }
-  .chat-header { flex-wrap: wrap; gap: 8px; }
-  .bubble { max-width: 85%; }
-
-  /* Échange de cartes : colonnes empilées, flèche horizontale */
-  .trade-shell {
     grid-template-columns: 1fr;
   }
-  .trade-mid {
-    padding-top: 0;
-    flex-direction: row;
-    justify-content: center;
-  }
-
-  /* Page "Mon pokémon" */
-  .grand-viewer-frame { max-width: 260px; }
-  .action-row { max-width: none; }
-
-  .modele3d-picker, .type-picker {
-    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-  }
+  .col { position: static; }
 }
 
 /* ============================================================
@@ -915,3 +842,130 @@ textarea { resize: vertical; min-height: 70px; }
 }
 .text-faint { color: var(--text-faint); }
 .mt-0 { margin-top: 0; }
+
+/* ============================================================
+   MOBILE — bloc volontairement placé en toute fin de fichier pour
+   être certain qu'il l'emporte sur toutes les règles définies plus
+   haut (une règle plus tardive dans le fichier gagne à spécificité
+   égale : mettre les media queries ailleurs que tout à la fin est
+   une source classique de bugs "ça ne s'applique pas sur mobile").
+   ============================================================ */
+@media (max-width: 640px) {
+  html, body { font-size: 14px; overflow-x: hidden; }
+
+  .top-nav {
+    flex-wrap: wrap;
+    gap: 8px 10px;
+    padding: 10px 14px;
+  }
+  .brand { font-size: 15px; gap: 8px; }
+  .brand-mark { width: 24px; height: 24px; }
+  .top-search {
+    order: 3;
+    flex-basis: 100%;
+    max-width: none;
+  }
+  .top-nav-icons { gap: 6px; }
+  .icon-btn { width: 32px; height: 32px; font-size: 14px; }
+
+  .layout, .layout.two-col, .layout.center-only {
+    grid-template-columns: 1fr;
+    padding: 0 12px;
+    gap: 14px;
+    margin: 14px auto;
+  }
+
+  .auth-shell { margin: 24px auto; padding: 0 14px; }
+  .auth-card { padding: 18px; }
+
+  .trainer-card-inner, .card { padding: 14px; }
+
+  .card-grid {
+    grid-template-columns: repeat(auto-fill, minmax(115px, 1fr));
+    gap: 10px;
+  }
+
+  .composer { flex-wrap: wrap; }
+  .composer-input { flex-basis: 100%; order: 3; }
+
+  .post-actions { flex-wrap: wrap; }
+
+  /* Messagerie : liste des conversations au-dessus, fenêtre en dessous */
+  .chat-shell {
+    grid-template-columns: 1fr !important;
+    height: auto !important;
+  }
+  .chat-list {
+    max-height: 180px;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+  .chat-window { height: 62vh; }
+  .chat-header { flex-wrap: wrap; gap: 8px; }
+  .bubble { max-width: 85%; }
+
+  /* Échange de cartes : colonnes empilées, flèche horizontale */
+  .trade-shell {
+    grid-template-columns: 1fr !important;
+  }
+  .trade-mid {
+    padding-top: 0;
+    flex-direction: row;
+    justify-content: center;
+  }
+
+  /* Page "Mon pokémon" */
+  .grand-viewer-frame { max-width: 260px; }
+  .action-row { max-width: none; }
+
+  .modele3d-picker, .type-picker {
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  }
+
+  /* Panneau de notifications : plein écran plutôt qu'un petit menu flottant */
+  .notif-panel {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    width: auto; max-height: none;
+    border-radius: 0;
+  }
+}
+
+/* ============================================================
+   MENTIONS "@pseudo"
+   ============================================================ */
+.mention {
+  color: var(--accent-strong);
+  font-weight: 600;
+}
+
+.mention-suggestions {
+  position: absolute;
+  z-index: 40;
+  top: 100%;
+  left: 0;
+  margin-top: 4px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-s);
+  overflow: hidden;
+  min-width: 180px;
+  max-width: 260px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4);
+}
+.mention-suggestion-item {
+  padding: 8px 12px;
+  font-size: 12.5px;
+  cursor: pointer;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.mention-suggestion-item:hover,
+.mention-suggestion-item.actif {
+  background: var(--accent-soft);
+}
+.mention-suggestion-item .pkm {
+  color: var(--text-faint);
+  font-size: 11px;
+}

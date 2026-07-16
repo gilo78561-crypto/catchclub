@@ -11,4 +11,5 @@ urlpatterns = [
     path('suivre/<str:username>/', views.suivre, name='suivre'),
     path('se-desabonner/<str:username>/', views.se_desabonner, name='se_desabonner'),
     path('recherche/', views.rechercher, name='rechercher'),
+    path('mentions/suggestions/', views.suggestions_mention, name='suggestions_mention'),
 ]
